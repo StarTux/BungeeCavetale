@@ -46,7 +46,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     private LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<>();
     private final List<Command> remoteCommands = new ArrayList<>();
     private final List<Command> serverCommands = new ArrayList<>();
-    private Properties bansProperties, playerCacheProperties;
+    private Properties connectProperties, bansProperties, playerCacheProperties;
 
     @Override
     public void onEnable() {
@@ -74,10 +74,11 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                     }
                 }
             });
-        connect = new Connect("bungee", new File(getDataFolder(), "servers.txt"), this);
+        loadConfigs();
+        String connectName = connectProperties.getProperty("server-name", "bungee");
+        connect = new Connect(connectName, new File(getDataFolder(), "servers.txt"), this);
         connect.start();
         getProxy().getScheduler().runAsync(this, this);
-        loadConfigs();
     }
 
     @Override
@@ -176,6 +177,14 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         playerCacheProperties = new Properties();
         try {
             playerCacheProperties.load(new FileInputStream(new File(getDataFolder(), "playercache.properties")));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        } catch (IllegalArgumentException iae) {
+            iae.printStackTrace();
+        }
+        connectProperties = new Properties();
+        try {
+            connectProperties.load(new FileInputStream(new File(getDataFolder(), "connect.properties")));
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } catch (IllegalArgumentException iae) {
