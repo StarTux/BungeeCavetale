@@ -33,6 +33,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Command;
@@ -280,7 +281,15 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         Map<String, Object> map = new HashMap<>();
         map.put("uuid", uuid);
         map.put("name", name);
-        connect.broadcast("BUNGEE_PLAYER_LOGIN", map);
+        connect.broadcast("BUNGEE_PLAYER_JOIN", map);
+    }
+
+    @EventHandler
+    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("uuid", event.getPlayer().getUniqueId());
+        map.put("name", event.getPlayer().getName());
+        connect.broadcast("BUNGEE_PLAYER_QUIT", map);
     }
 
     Connection connectionFromProperties(Properties properties) {
