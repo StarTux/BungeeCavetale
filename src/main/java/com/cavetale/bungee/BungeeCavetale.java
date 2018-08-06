@@ -40,6 +40,7 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
+import org.json.simple.JSONValue;
 
 public final class BungeeCavetale extends Plugin implements ConnectHandler, Listener, Runnable {
     private final Map<UUID, String> origins = new HashMap<>();
@@ -69,6 +70,15 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                         sender.sendMessage(TextComponent.fromLegacyText("Servers"));
                         for (ServerConnection server: connect.getServer().getConnections()) {
                             sender.sendMessage(TextComponent.fromLegacyText(server.getName() + " " + server.getStatus()));
+                        }
+                    case "send":
+                        if (args.length >= 4) {
+                            StringBuilder sb = new StringBuilder(args[3]);
+                            for (int i = 4; i < args.length; i += 1) {
+                                sb.append(" ").append(args[i]);
+                            }
+                            connect.send(args[1], args[2], JSONValue.parse(sb.toString()));
+                            sender.sendMessage("Sent to " + args[1] + ": " + args[2] + ": " + JSONValue.parse(sb.toString()));
                         }
                     default:
                         break;
@@ -279,17 +289,17 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
             return;
         }
         Map<String, Object> map = new HashMap<>();
-        map.put("uuid", uuid);
+        map.put("uuid", uuid.toString());
         map.put("name", name);
-        connect.broadcast("BUNGEE_PLAYER_JOIN", map);
+        tasks.add(() -> connect.broadcastAll("BUNGEE_PLAYER_JOIN", map));
     }
 
     @EventHandler
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         Map<String, Object> map = new HashMap<>();
-        map.put("uuid", event.getPlayer().getUniqueId());
+        map.put("uuid", event.getPlayer().getUniqueId().toString());
         map.put("name", event.getPlayer().getName());
-        connect.broadcast("BUNGEE_PLAYER_QUIT", map);
+        tasks.add(() -> connect.broadcastAll("BUNGEE_PLAYER_QUIT", map));
     }
 
     Connection connectionFromProperties(Properties properties) {
