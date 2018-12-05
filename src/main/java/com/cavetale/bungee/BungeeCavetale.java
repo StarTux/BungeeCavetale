@@ -1,11 +1,9 @@
 package com.cavetale.bungee;
 
-import com.winthier.connect.Client;
 import com.winthier.connect.Connect;
 import com.winthier.connect.ConnectHandler;
 import com.winthier.connect.Message;
 import com.winthier.connect.OnlinePlayer;
-import com.winthier.connect.ServerConnection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,10 +23,8 @@ import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import lombok.Value;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -64,12 +60,8 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                         break;
                     case "status":
                         sender.sendMessage(TextComponent.fromLegacyText("Clients"));
-                        for (Client client: connect.getClients()) {
-                            sender.sendMessage(TextComponent.fromLegacyText(client.getName() + " " + client.getStatus()));
-                        }
-                        sender.sendMessage(TextComponent.fromLegacyText("Servers"));
-                        for (ServerConnection server: connect.getServer().getConnections()) {
-                            sender.sendMessage(TextComponent.fromLegacyText(server.getName() + " " + server.getStatus()));
+                        for (String remote: connect.listServers()) {
+                            sender.sendMessage(TextComponent.fromLegacyText("- " + remote));
                         }
                     case "send":
                         if (args.length >= 4) {
@@ -87,8 +79,8 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
             });
         loadConfigs();
         String connectName = connectProperties.getProperty("server-name", "bungee");
-        connect = new Connect(connectName, new File(getDataFolder(), "servers.txt"), this);
-        connect.start();
+        this.connect = new Connect(connectName, this);
+        ProxyServer.getInstance().getScheduler().runAsync(this, this.connect);
         getProxy().getScheduler().runAsync(this, this);
     }
 
@@ -125,7 +117,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                 nargs[i + 2] = args[i];
             }
         }
-        connect.sendRemoteCommand(new OnlinePlayer(player.getUniqueId(), player.getName()), "daemon", nargs);
+        connect.sendRemoteCommand("daemon", new OnlinePlayer(player.getUniqueId(), player.getName()), nargs);
     }
 
     void onServerCommand(CommandSender sender, String label, String[] args) {
@@ -260,32 +252,32 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         String name = event.getConnection().getName();
         Ban ban = getActiveBan(uuid);
         if (ban != null) {
-            String admin = ban.admin;
-            if (admin != null) {
-                UUID adminId;
-                try {
-                    adminId = UUID.fromString(admin);
-                    PlayerCache cache = findPlayerCache(adminId, null);
-                    admin = cache.name;
-                } catch (IllegalArgumentException iae) {
-                    iae.printStackTrace();
-                    admin = null;
-                }
-            }
-            String reason = ban.reason;
-            event.setCancelled(true);
-            ComponentBuilder builder = new ComponentBuilder("You are banned!").color(ChatColor.RED);
-            if (admin != null) {
-                builder.append("\nBy: ").color(ChatColor.WHITE)
-                    .append(admin).color(ChatColor.GRAY);
-            }
-            if (reason != null) {
-                builder.append("\nReason: ").color(ChatColor.WHITE)
-                    .append(reason).color(ChatColor.GRAY);
-            }
-            builder.append("\nPlease appeal your ban at ").color(ChatColor.WHITE);
-            builder.append("https://cavetale.com").color(ChatColor.BLUE);
-            event.setCancelReason(builder.create());
+            // String admin = ban.admin;
+            // if (admin != null) {
+            //     UUID adminId;
+            //     try {
+            //         adminId = UUID.fromString(admin);
+            //         PlayerCache cache = findPlayerCache(adminId, null);
+            //         admin = cache.name;
+            //     } catch (IllegalArgumentException iae) {
+            //         iae.printStackTrace();
+            //         admin = null;
+            //     }
+            // }
+            // String reason = ban.reason;
+            // event.setCancelled(true);
+            // ComponentBuilder builder = new ComponentBuilder("You are banned!").color(ChatColor.RED);
+            // if (admin != null) {
+            //     builder.append("\nBy: ").color(ChatColor.WHITE)
+            //         .append(admin).color(ChatColor.GRAY);
+            // }
+            // if (reason != null) {
+            //     builder.append("\nReason: ").color(ChatColor.WHITE)
+            //         .append(reason).color(ChatColor.GRAY);
+            // }
+            // builder.append("\nPlease appeal your ban at ").color(ChatColor.WHITE);
+            // builder.append("https://cavetale.com").color(ChatColor.BLUE);
+            // event.setCancelReason(builder.create());
             return;
         }
         Map<String, Object> map = new HashMap<>();
@@ -375,24 +367,13 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         return null;
     }
 
-    // Connect Handler
+    // --- Connect Handler
 
     @Override
-    public void runThread(Runnable task) {
-        ProxyServer.getInstance().getScheduler().runAsync(this, task);
-    }
+    public void handleRemoteConnect(String remote) { }
 
     @Override
-    public void handleClientConnect(Client client) { }
-
-    @Override
-    public void handleClientDisconnect(Client client) { }
-
-    @Override
-    public void handleServerConnect(ServerConnection connection) { }
-
-    @Override
-    public void handleServerDisconnect(ServerConnection connection) { }
+    public void handleRemoteDisconnect(String remote) { }
 
     @Override
     public void handleMessage(Message message) { }
