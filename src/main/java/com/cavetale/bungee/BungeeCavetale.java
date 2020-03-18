@@ -38,11 +38,13 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     private LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<>();
     private final List<Command> serverCommands = new ArrayList<>();
     private Properties connectProperties;
+    private EventListener eventListener = new EventListener(this);
     Gson gson = new Gson();
 
     @Override
     public void onEnable() {
         getProxy().getPluginManager().registerListener(this, this);
+        getProxy().getPluginManager().registerListener(this, eventListener);
         getProxy().getPluginManager()
             .registerCommand(this, new Command("bcavetale", "admin", new String[0]) {
                 @Override
@@ -185,6 +187,14 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         map.put("uuid", event.getPlayer().getUniqueId().toString());
         map.put("name", event.getPlayer().getName());
         tasks.add(() -> connect.broadcastAll("BUNGEE_PLAYER_QUIT", map));
+    }
+
+    public void runTask(Runnable task) {
+        tasks.add(task);
+    }
+
+    public void broadcastAll(String channel, Object payload) {
+        tasks.add(() -> connect.broadcastAll(channel, payload));
     }
 
     // --- Connect Handler
