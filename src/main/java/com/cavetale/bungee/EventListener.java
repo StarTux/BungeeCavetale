@@ -3,8 +3,10 @@ package com.cavetale.bungee;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.ClientConnectEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PlayerHandshakeEvent;
@@ -28,6 +30,16 @@ public final class EventListener implements Listener {
         return o == null ? "" : o.toString();
     }
 
+    private static String serverInfo(Server server) {
+        if (server == null) return "";
+        return serverInfo(server.getInfo());
+    }
+
+    private static String serverInfo(ServerInfo info) {
+        if (info == null) return "";
+        return str(info.getName());
+    }
+
     private void put(Map<String, Object> map, String key, Object value) {
         if (value == null) {
             map.put(key, "");
@@ -36,16 +48,16 @@ public final class EventListener implements Listener {
         } else if (value instanceof ProxiedPlayer) {
             ProxiedPlayer player = (ProxiedPlayer) value;
             Map<String, String> map2 = new LinkedHashMap<>();
-            map2.put("uuid", player.getUniqueId().toString());
-            map2.put("name", player.getName());
+            map2.put("uuid", str(player.getUniqueId()));
+            map2.put("name", str(player.getName()));
             map2.put("locale", str(player.getLocale()));
-            map2.put("server", player.getServer().getInfo().getName());
+            map2.put("server", serverInfo(player.getServer()));
             map.put(key, map2);
         } else if (value instanceof PendingConnection) {
             PendingConnection con = (PendingConnection) value;
             Map<String, String> map2 = new LinkedHashMap<>();
-            map2.put("uuid", con.getUniqueId().toString());
-            map2.put("name", con.getName());
+            map2.put("uuid", str(con.getUniqueId()));
+            map2.put("name", str(con.getName()));
             map2.put("socketAddress", con.getAddress().toString());
             map.put(key, map2);
         } else {
@@ -93,7 +105,7 @@ public final class EventListener implements Listener {
     public void onServerConnected(ServerConnectedEvent event) {
         Map<String, Object> map = map(event);
         put(map, "player", event.getPlayer());
-        put(map, "server", event.getServer().getInfo().getName());
+        put(map, "server", serverInfo(event.getServer()));
         plugin.broadcastAll(CHANNEL, map);
     }
 
