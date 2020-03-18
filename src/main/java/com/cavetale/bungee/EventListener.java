@@ -7,9 +7,7 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
-import net.md_5.bungee.api.event.ClientConnectEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PlayerHandshakeEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
@@ -72,23 +70,9 @@ public final class EventListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onClientConnect(ClientConnectEvent event) {
-        Map<String, Object> map = map(event);
-        put(map, "socketAddress", event.getSocketAddress());
-        plugin.broadcastAll(CHANNEL, map);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         Map<String, Object> map = map(event);
         put(map, "player", event.getPlayer());
-        plugin.broadcastAll(CHANNEL, map);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerhandshake(PlayerHandshakeEvent event) {
-        Map<String, Object> map = map(event);
-        put(map, "connection", event.getConnection());
         plugin.broadcastAll(CHANNEL, map);
     }
 
