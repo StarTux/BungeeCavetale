@@ -92,14 +92,13 @@
               <artifactSet>
                 <includes>
                   <include>com.winthier.connect:connect-core</include>
-                  <include>org.apache.commons:commons-pool2</include>
                 </includes>
               </artifactSet>
               <filters>
                 <filter>
                   <artifact>com.winthier.connect:connect-core</artifact>
                   <includes>
-                    <include>com/winthier/connect/**</include>
+                    <include>**/*.class</include>
                   </includes>
                 </filter>
               </filters>
