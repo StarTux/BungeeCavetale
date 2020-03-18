@@ -75,7 +75,6 @@ public final class EventListener implements Listener {
     public void onClientConnect(ClientConnectEvent event) {
         Map<String, Object> map = map(event);
         put(map, "socketAddress", event.getSocketAddress());
-        put(map, "listener", event.getListener());
         plugin.broadcastAll(CHANNEL, map);
     }
 
