@@ -1,65 +1,66 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project>
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.cavetale</groupId>
   <artifactId>bungee-cavetale</artifactId>
-  <packaging>jar</packaging>
   <version>0.1</version>
+
   <name>Bungee-Cavetale</name>
+  <packaging>jar</packaging>
   <url>http://cavetale.com</url>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <repositories>
-    <!-- Spigot Repo -->
+
+    <!-- Paper Repo -->
     <repository>
-      <id>spigot-repo</id>
-      <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+      <id>papermc</id>
+      <url>https://papermc.io/repo/repository/maven-public/</url>
     </repository>
+
     <!-- Cavetale Repo -->
     <repository>
       <id>cavetale</id>
       <url>https://cavetale.com/jenkins/plugin/repository/everything/</url>
     </repository>
+
   </repositories>
   <dependencies>
-    <!-- Bungee -->
+
+    <!-- Waterfall -->
     <dependency>
-      <groupId>net.md-5</groupId>
-      <artifactId>bungeecord-api</artifactId>
-      <version>1.12-SNAPSHOT</version>
+      <groupId>io.github.waterfallmc</groupId>
+      <artifactId>waterfall-api</artifactId>
+      <version>1.15-SNAPSHOT</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
+
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.14.8</version>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
+
     <!-- Connect -->
     <dependency>
       <groupId>com.winthier.connect</groupId>
       <artifactId>connect-core</artifactId>
       <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <!-- JSON-Simple -->
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <!-- Jedis -->
-    <dependency>
-      <groupId>redis.clients</groupId>
-      <artifactId>jedis</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
-      <type>jar</type>
       <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
+
   </dependencies>
   <build>
     <finalName>${project.name}</finalName>
     <plugins>
+
       <!-- Java 8 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -75,6 +76,7 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
       <!-- Shade -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -90,8 +92,6 @@
               <artifactSet>
                 <includes>
                   <include>com.winthier.connect:connect-core</include>
-                  <include>com.googlecode.json-simple:json-simple</include>
-                  <include>redis.clients:jedis</include>
                   <include>org.apache.commons:commons-pool2</include>
                 </includes>
               </artifactSet>
@@ -102,17 +102,12 @@
                     <include>com/winthier/connect/**</include>
                   </includes>
                 </filter>
-                <filter>
-                  <artifact>com.googlecode.json-simple:json-simple</artifact>
-                  <includes>
-                    <include>org/json/simple/**</include>
-                  </includes>
-                </filter>
               </filters>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
     </plugins>
   </build>
 </project>
