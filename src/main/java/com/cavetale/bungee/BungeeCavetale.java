@@ -148,18 +148,6 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         if (task != null) task.run();
     }
 
-    void sendPlayerList() {
-        Map<String, Object> serverMap = new HashMap<>();
-        for (ServerInfo serverInfo: getProxy().getServers().values()) {
-            Map<String, Object> playerMap = new HashMap<>();
-            serverMap.put(serverInfo.getName(), playerMap);
-            for (ProxiedPlayer player: serverInfo.getPlayers()) {
-                playerMap.put(player.getUniqueId().toString(), player.getName());
-            }
-        }
-        connect.broadcast("BUNGEE_PLAYER_LIST", serverMap);
-    }
-
     // Listener
 
     @EventHandler
