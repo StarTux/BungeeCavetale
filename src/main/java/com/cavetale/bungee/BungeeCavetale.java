@@ -11,10 +11,13 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -23,9 +26,8 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.ServerDisconnectEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
@@ -33,12 +35,12 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 
 public final class BungeeCavetale extends Plugin implements ConnectHandler, Listener, Runnable {
-    private final Map<UUID, String> origins = new HashMap<>();
     private Connect connect;
     private LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<>();
     private final List<Command> serverCommands = new ArrayList<>();
     private Properties connectProperties;
     private EventListener eventListener = new EventListener(this);
+    private Set<UUID> loggedIn = Collections.synchronizedSet(new HashSet<>());
     Gson gson = new Gson();
 
     @Override
@@ -153,17 +155,9 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     // Listener
 
     @EventHandler
-    public void onServerDisconnect(ServerDisconnectEvent event) {
-        String targetName = event.getTarget().getName();
-        if (targetName.equals("hub")) return;
-        origins.put(event.getPlayer().getUniqueId(), targetName);
-    }
-
-    @EventHandler
     public void onServerKickEvent(ServerKickEvent event) {
         String from = event.getKickedFrom().getName();
         if (from.equals("hub")) return;
-        String origin = origins.get(event.getPlayer().getUniqueId());
         ServerInfo cancelServer = null;
         cancelServer = getProxy().getServerInfo("hub");
         if (cancelServer == null) return;
@@ -172,21 +166,25 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     }
 
     @EventHandler
-    public void onLogin(LoginEvent event) {
-        UUID uuid = event.getConnection().getUniqueId();
-        String name = event.getConnection().getName();
+    public void onLogin(PostLoginEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        String name = event.getPlayer().getName();
         Map<String, Object> map = new HashMap<>();
         map.put("uuid", uuid.toString());
         map.put("name", name);
-        tasks.add(() -> connect.broadcastAll("BUNGEE_PLAYER_JOIN", map));
+        loggedIn.add(uuid);
+        broadcastAll("BUNGEE_PLAYER_JOIN", map);
     }
 
     @EventHandler
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        if (!loggedIn.remove(uuid)) return;
+        String name = event.getPlayer().getName();
         Map<String, Object> map = new HashMap<>();
-        map.put("uuid", event.getPlayer().getUniqueId().toString());
-        map.put("name", event.getPlayer().getName());
-        tasks.add(() -> connect.broadcastAll("BUNGEE_PLAYER_QUIT", map));
+        map.put("uuid", uuid.toString());
+        map.put("name", name);
+        broadcastAll("BUNGEE_PLAYER_QUIT", map);
     }
 
     public void runTask(Runnable task) {
@@ -194,7 +192,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     }
 
     public void broadcastAll(String channel, Object payload) {
-        tasks.add(() -> connect.broadcastAll(channel, payload));
+        runTask(() -> connect.broadcastAll(channel, payload));
     }
 
     // --- Connect Handler

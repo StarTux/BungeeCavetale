@@ -1,5 +1,6 @@
 package com.cavetale.bungee;
 
+import com.google.gson.Gson;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -23,39 +24,41 @@ import net.md_5.bungee.event.EventPriority;
 public final class EventListener implements Listener {
     private final BungeeCavetale plugin;
     static final String CHANNEL = "bungee";
+    private Gson gson = new Gson();
+    private boolean debug = true;
 
-    private static String str(Object o) {
-        return o == null ? "" : o.toString();
+    private static void str(Map<String, Object> map, String key, Object o) {
+        if (o == null) return;
+        map.put(key, o.toString());
     }
 
-    private static String serverInfo(Server server) {
-        if (server == null) return "";
-        return serverInfo(server.getInfo());
+    private static void serverInfo(Map<String, Object> map, Server server) {
+        if (server == null) return;
+        serverInfo(map, server.getInfo());
     }
 
-    private static String serverInfo(ServerInfo info) {
-        if (info == null) return "";
-        return str(info.getName());
+    private static void serverInfo(Map<String, Object> map, ServerInfo info) {
+        if (info == null) return;
+        str(map, "server", info.getName());
     }
 
-    private void put(Map<String, Object> map, String key, Object value) {
+    private void auto(Map<String, Object> map, String key, Object value) {
         if (value == null) {
             map.put(key, "");
         } else if (value instanceof String) {
             map.put(key, value);
         } else if (value instanceof ProxiedPlayer) {
             ProxiedPlayer player = (ProxiedPlayer) value;
-            Map<String, String> map2 = new LinkedHashMap<>();
-            map2.put("uuid", str(player.getUniqueId()));
-            map2.put("name", str(player.getName()));
-            map2.put("locale", str(player.getLocale()));
-            map2.put("server", serverInfo(player.getServer()));
+            Map<String, Object> map2 = new LinkedHashMap<>();
+            str(map2, "uuid", player.getUniqueId());
+            str(map2, "name", player.getName());
+            serverInfo(map2, player.getServer());
             map.put(key, map2);
         } else if (value instanceof PendingConnection) {
             PendingConnection con = (PendingConnection) value;
-            Map<String, String> map2 = new LinkedHashMap<>();
-            map2.put("uuid", str(con.getUniqueId()));
-            map2.put("name", str(con.getName()));
+            Map<String, Object> map2 = new LinkedHashMap<>();
+            str(map2, "uuid", con.getUniqueId());
+            str(map2, "name", con.getName());
             map2.put("socketAddress", con.getAddress().toString());
             map.put(key, map2);
         } else {
@@ -72,56 +75,63 @@ public final class EventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
+        auto(map, "player", event.getPlayer());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPostLogin(PostLoginEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
+        auto(map, "player", event.getPlayer());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerConnected(ServerConnectedEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
-        put(map, "server", serverInfo(event.getServer()));
+        auto(map, "player", event.getPlayer());
+        serverInfo(map, event.getServer());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerConnect(ServerConnectEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
-        put(map, "server", event.getTarget().getName());
+        auto(map, "player", event.getPlayer());
+        serverInfo(map, event.getTarget());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerDisconnect(ServerDisconnectEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
-        put(map, "server", event.getTarget().getName());
+        auto(map, "player", event.getPlayer());
+        serverInfo(map, event.getTarget());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerKick(ServerKickEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
-        put(map, "server", event.getKickedFrom().getName());
-        put(map, "cause", event.getCause());
-        put(map, "reason", event.getKickReason());
-        put(map, "state", event.getState());
+        auto(map, "player", event.getPlayer());
+        serverInfo(map, event.getKickedFrom());
+        auto(map, "cause", event.getCause());
+        auto(map, "reason", event.getKickReason());
+        auto(map, "state", event.getState());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerSwitch(ServerSwitchEvent event) {
         Map<String, Object> map = map(event);
-        put(map, "player", event.getPlayer());
+        auto(map, "player", event.getPlayer());
+        if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, map);
     }
 }
