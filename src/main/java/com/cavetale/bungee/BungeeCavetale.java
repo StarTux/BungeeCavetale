@@ -28,6 +28,7 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
@@ -40,7 +41,8 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     private final List<Command> serverCommands = new ArrayList<>();
     private Properties connectProperties;
     private EventListener eventListener = new EventListener(this);
-    private Set<UUID> loggedIn = Collections.synchronizedSet(new HashSet<>());
+    private Set<UUID> joined = Collections.synchronizedSet(new HashSet<>());
+    private Set<UUID> connected = Collections.synchronizedSet(new HashSet<>());
     Gson gson = new Gson();
 
     @Override
@@ -168,22 +170,34 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     @EventHandler
     public void onLogin(PostLoginEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
+        joined.add(uuid);
+    }
+
+    @EventHandler
+    public void onServerConnected(ServerConnectedEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        if (!joined.remove(uuid)) return;
+        connected.add(uuid);
         String name = event.getPlayer().getName();
+        String server = event.getServer().getInfo().getName();
         Map<String, Object> map = new HashMap<>();
         map.put("uuid", uuid.toString());
         map.put("name", name);
-        loggedIn.add(uuid);
+        map.put("server", server);
         broadcastAll("BUNGEE_PLAYER_JOIN", map);
     }
 
     @EventHandler
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        if (!loggedIn.remove(uuid)) return;
+        if (!connected.remove(uuid)) return;
         String name = event.getPlayer().getName();
+        if (event.getPlayer().getServer() == null) return;
+        String server = event.getPlayer().getServer().getInfo().getName();
         Map<String, Object> map = new HashMap<>();
         map.put("uuid", uuid.toString());
         map.put("name", name);
+        map.put("server", server);
         broadcastAll("BUNGEE_PLAYER_QUIT", map);
     }
 
