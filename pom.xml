@@ -33,7 +33,7 @@
     <dependency>
       <groupId>io.github.waterfallmc</groupId>
       <artifactId>waterfall-api</artifactId>
-      <version>1.15-SNAPSHOT</version>
+      <version>1.16-R0.4-SNAPSHOT</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.12</version>
+      <version>1.18.16</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>

@@ -165,6 +165,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         if (cancelServer == null) return;
         event.setCancelled(true);
         event.setCancelServer(cancelServer);
+        event.getPlayer().sendMessage(event.getKickReasonComponent());
     }
 
     @EventHandler
