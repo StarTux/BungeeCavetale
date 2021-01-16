@@ -219,7 +219,28 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     public void handleRemoteDisconnect(String remote) { }
 
     @Override
-    public void handleMessage(Message message) { }
+    public void handleMessage(Message message) {
+        switch (message.getChannel()) {
+        case "Bans":
+            try {
+                Ban ban = gson.fromJson(gson.toJsonTree(message.getPayload()), Ban.class);
+                switch (ban.getType()) {
+                case "BAN": case "KICK":
+                    ProxiedPlayer player = getProxy().getPlayer(ban.getPlayer().getUuid());
+                    if (player == null) return;
+                    getLogger().info("Bans: Kicking player: " + player.getName());
+                    player.disconnect(TextComponent.fromLegacyText(ban.getMessage()));
+                    return;
+                default: return;
+                }
+            } catch (RuntimeException re) {
+                System.err.println("handleMessage: " + message);
+                re.printStackTrace();
+                return;
+            }
+        default: break;
+        }
+    }
 
     @Override
     public void handleRemoteCommand(OnlinePlayer sender, String server, String[] args) { }
