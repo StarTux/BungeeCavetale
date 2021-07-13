@@ -25,7 +25,7 @@ public final class EventListener implements Listener {
     private final BungeeCavetale plugin;
     static final String CHANNEL = "bungee";
     private Gson gson = new Gson();
-    private boolean debug = true;
+    private boolean debug = false;
 
     private static void str(Map<String, Object> map, String key, Object o) {
         if (o == null) return;
