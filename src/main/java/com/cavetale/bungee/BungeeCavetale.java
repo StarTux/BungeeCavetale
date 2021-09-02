@@ -4,18 +4,13 @@ import com.google.gson.Gson;
 import com.winthier.connect.Connect;
 import com.winthier.connect.ConnectHandler;
 import com.winthier.connect.Message;
-import com.winthier.connect.OnlinePlayer;
-import java.io.BufferedReader;
+import com.winthier.connect.payload.OnlinePlayer;
+import com.winthier.connect.payload.PlayerServerPayload;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -38,7 +33,6 @@ import net.md_5.bungee.event.EventHandler;
 public final class BungeeCavetale extends Plugin implements ConnectHandler, Listener, Runnable {
     private Connect connect;
     private LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<>();
-    private final List<Command> serverCommands = new ArrayList<>();
     private Properties connectProperties;
     private EventListener eventListener = new EventListener(this);
     private Set<UUID> joined = Collections.synchronizedSet(new HashSet<>());
@@ -49,8 +43,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     public void onEnable() {
         getProxy().getPluginManager().registerListener(this, this);
         getProxy().getPluginManager().registerListener(this, eventListener);
-        getProxy().getPluginManager()
-            .registerCommand(this, new Command("bcavetale", "admin", new String[0]) {
+        getProxy().getPluginManager().registerCommand(this, new Command("bcavetale", "admin", new String[0]) {
                 @Override
                 public void execute(CommandSender sender, String[] args) {
                     if (args.length == 0) return;
@@ -71,9 +64,9 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                             for (int i = 4; i < args.length; i += 1) {
                                 sb.append(" ").append(args[i]);
                             }
-                            Object obj = gson.fromJson(sb.toString(), Object.class);
-                            connect.send(args[1], args[2], obj);
-                            sender.sendMessage("Sent to " + args[1] + ": " + args[2] + ": " + obj);
+                            String payload = sb.toString();
+                            connect.send(args[1], args[2], payload);
+                            sender.sendMessage("Sent to " + args[1] + ": " + args[2] + ": " + payload);
                         }
                     default:
                         break;
@@ -100,44 +93,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         }
     }
 
-    void onServerCommand(CommandSender sender, String label, String[] args) {
-        if (!(sender instanceof ProxiedPlayer)) return;
-        ProxiedPlayer player = (ProxiedPlayer) sender;
-        ServerInfo server = getProxy().getServerInfo(label);
-        if (server == null) return;
-        player.connect(server);
-    }
-
     void loadConfigs() {
-        String line;
-        try {
-            // Server commands
-            serverCommands.clear();
-            for (Command command: serverCommands) {
-                getProxy().getPluginManager().unregisterCommand(command);
-            }
-            File file = new File(getDataFolder(), "server_commands.txt");
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                while (null != (line = br.readLine())) {
-                    if (line.startsWith("#")) continue;
-                    final String label = line;
-                    serverCommands.add(new Command(label, "", new String[0]) {
-                            @Override public void execute(CommandSender sender, String[] args) {
-                                onServerCommand(sender, label, args);
-                            }
-                        });
-                }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-            for (Command command: serverCommands) {
-                System.out.println("[Cavetale] Registering server command \""
-                                   + command.getName() + "\"...");
-                getProxy().getPluginManager().registerCommand(this, command);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         connectProperties = new Properties();
         try {
             File file = new File(getDataFolder(), "connect.properties");
@@ -181,11 +137,8 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         connected.add(uuid);
         String name = event.getPlayer().getName();
         String server = event.getServer().getInfo().getName();
-        Map<String, Object> map = new HashMap<>();
-        map.put("uuid", uuid.toString());
-        map.put("name", name);
-        map.put("server", server);
-        broadcastAll("BUNGEE_PLAYER_JOIN", map);
+        PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name), server);
+        broadcastAll("BUNGEE_PLAYER_JOIN", gson.toJson(payload));
     }
 
     @EventHandler
@@ -195,18 +148,15 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         String name = event.getPlayer().getName();
         if (event.getPlayer().getServer() == null) return;
         String server = event.getPlayer().getServer().getInfo().getName();
-        Map<String, Object> map = new HashMap<>();
-        map.put("uuid", uuid.toString());
-        map.put("name", name);
-        map.put("server", server);
-        broadcastAll("BUNGEE_PLAYER_QUIT", map);
+        PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name), server);
+        broadcastAll("BUNGEE_PLAYER_QUIT", gson.toJson(payload));
     }
 
     public void runTask(Runnable task) {
         tasks.add(task);
     }
 
-    public void broadcastAll(String channel, Object payload) {
+    public void broadcastAll(String channel, String payload) {
         runTask(() -> connect.broadcastAll(channel, payload));
     }
 

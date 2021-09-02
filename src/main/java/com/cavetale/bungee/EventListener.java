@@ -77,7 +77,7 @@ public final class EventListener implements Listener {
         Map<String, Object> map = map(event);
         auto(map, "player", event.getPlayer());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -85,7 +85,7 @@ public final class EventListener implements Listener {
         Map<String, Object> map = map(event);
         auto(map, "player", event.getPlayer());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -94,7 +94,7 @@ public final class EventListener implements Listener {
         auto(map, "player", event.getPlayer());
         serverInfo(map, event.getServer());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -103,7 +103,7 @@ public final class EventListener implements Listener {
         auto(map, "player", event.getPlayer());
         serverInfo(map, event.getTarget());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -112,7 +112,7 @@ public final class EventListener implements Listener {
         auto(map, "player", event.getPlayer());
         serverInfo(map, event.getTarget());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -124,7 +124,7 @@ public final class EventListener implements Listener {
         auto(map, "reason", event.getKickReason());
         auto(map, "state", event.getState());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -132,6 +132,6 @@ public final class EventListener implements Listener {
         Map<String, Object> map = map(event);
         auto(map, "player", event.getPlayer());
         if (debug) plugin.getLogger().info(gson.toJson(map));
-        plugin.broadcastAll(CHANNEL, map);
+        plugin.broadcastAll(CHANNEL, gson.toJson(map));
     }
 }
