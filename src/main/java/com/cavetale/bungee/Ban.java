@@ -9,6 +9,7 @@ import net.md_5.bungee.api.ChatColor;
 
 @Data
 public final class Ban {
+    private int id;
     private String type;
     private PlayerInfo player;
     private PlayerInfo admin;
