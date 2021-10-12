@@ -1,5 +1,6 @@
 package com.cavetale.bungee;
 
+import com.cavetale.bungee.message.BungeePlayerKick;
 import com.google.gson.Gson;
 import com.winthier.connect.Connect;
 import com.winthier.connect.ConnectHandler;
@@ -171,6 +172,19 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     @Override
     public void handleMessage(Message message) {
         switch (message.getChannel()) {
+        case "BUNGEE_PLAYER_KICK":
+            try {
+                BungeePlayerKick bungeePlayerKick = gson.fromJson(message.getPayload(), BungeePlayerKick.class);
+                ProxiedPlayer player = getProxy().getPlayer(bungeePlayerKick.getPlayer().getUuid());
+                if (player == null) return;
+                getLogger().info("Bungee: Kicking player: " + player.getName());
+                player.disconnect(bungeePlayerKick.parseMessage());
+            } catch (RuntimeException re) {
+                System.err.println("handleMessage BUNGEE_PLAYER_KICK: " + message);
+                re.printStackTrace();
+                return;
+            }
+            break;
         case "Bans":
             try {
                 Ban ban = gson.fromJson(gson.toJsonTree(message.getPayload()), Ban.class);
