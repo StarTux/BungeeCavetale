@@ -67,7 +67,8 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                             }
                             String payload = sb.toString();
                             connect.send(args[1], args[2], payload);
-                            sender.sendMessage("Sent to " + args[1] + ": " + args[2] + ": " + payload);
+                            sender.sendMessage(TextComponent
+                                               .fromLegacyText("Sent to " + args[1] + ": " + args[2] + ": " + payload));
                         }
                     default:
                         break;

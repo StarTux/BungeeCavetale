@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -59,7 +60,6 @@ public final class EventListener implements Listener {
             Map<String, Object> map2 = new LinkedHashMap<>();
             str(map2, "uuid", con.getUniqueId());
             str(map2, "name", con.getName());
-            map2.put("socketAddress", con.getAddress().toString());
             map.put(key, map2);
         } else {
             map.put(key, value.toString());
@@ -121,7 +121,7 @@ public final class EventListener implements Listener {
         auto(map, "player", event.getPlayer());
         serverInfo(map, event.getKickedFrom());
         auto(map, "cause", event.getCause());
-        auto(map, "reason", event.getKickReason());
+        auto(map, "reason", BaseComponent.toLegacyText(event.getKickReasonComponent()));
         auto(map, "state", event.getState());
         if (debug) plugin.getLogger().info(gson.toJson(map));
         plugin.broadcastAll(CHANNEL, gson.toJson(map));
