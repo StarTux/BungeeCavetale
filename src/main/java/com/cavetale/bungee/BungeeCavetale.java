@@ -188,7 +188,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
             break;
         case "Bans":
             try {
-                Ban ban = gson.fromJson(gson.toJsonTree(message.getPayload()), Ban.class);
+                Ban ban = gson.fromJson(message.getPayload(), Ban.class);
                 switch (ban.getType()) {
                 case "BAN": case "KICK":
                     ProxiedPlayer player = getProxy().getPlayer(ban.getPlayer().getUuid());
