@@ -139,7 +139,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         connected.add(uuid);
         String name = event.getPlayer().getName();
         String server = event.getServer().getInfo().getName();
-        PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name), server);
+        PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name, server), server);
         broadcastAll("BUNGEE_PLAYER_JOIN", gson.toJson(payload));
     }
 
@@ -150,7 +150,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         String name = event.getPlayer().getName();
         if (event.getPlayer().getServer() == null) return;
         String server = event.getPlayer().getServer().getInfo().getName();
-        PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name), server);
+        PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name, server), server);
         broadcastAll("BUNGEE_PLAYER_QUIT", gson.toJson(payload));
     }
 
