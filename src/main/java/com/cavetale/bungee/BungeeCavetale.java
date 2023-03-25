@@ -117,6 +117,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     @EventHandler
     public void onServerKickEvent(ServerKickEvent event) {
         String from = event.getKickedFrom().getName();
+        if (from.equals("void")) return;
         boolean fromHub = from.equals("hub");
         ServerInfo cancelServer = null;
         cancelServer = getProxy().getServerInfo(fromHub ? "void" : "hub");
