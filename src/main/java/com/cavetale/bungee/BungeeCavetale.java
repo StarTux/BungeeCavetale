@@ -140,7 +140,11 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         String name = event.getPlayer().getName();
         String server = event.getServer().getInfo().getName();
         PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name, server), server);
-        broadcastAll("BUNGEE_PLAYER_JOIN", gson.toJson(payload));
+        runTask(() -> {
+                connect.broadcastAll("BUNGEE_PLAYER_JOIN", gson.toJson(payload));
+                getLogger().info("TASK BUNGEE_PLAYER_JOIN " + name + " " + server);
+            });
+        getLogger().info("BUNGEE_PLAYER_JOIN " + name + " " + server);
     }
 
     @EventHandler
@@ -151,7 +155,11 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         if (event.getPlayer().getServer() == null) return;
         String server = event.getPlayer().getServer().getInfo().getName();
         PlayerServerPayload payload = new PlayerServerPayload(new OnlinePlayer(uuid, name, server), server);
-        broadcastAll("BUNGEE_PLAYER_QUIT", gson.toJson(payload));
+        runTask(() -> {
+                connect.broadcastAll("BUNGEE_PLAYER_QUIT", gson.toJson(payload));
+                getLogger().info("TASK BUNGEE_PLAYER_QUIT " + name + " " + server);
+            });
+        getLogger().info("BUNGEE_PLAYER_QUIT " + name + " " + server);
     }
 
     public void runTask(Runnable task) {
