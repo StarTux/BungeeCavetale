@@ -66,6 +66,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                         for (String remote: connect.listServers()) {
                             sender.sendMessage(TextComponent.fromLegacyText("- " + remote));
                         }
+                        break;
                     case "send":
                         if (args.length >= 4) {
                             StringBuilder sb = new StringBuilder(args[3]);
@@ -77,6 +78,10 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                             sender.sendMessage(TextComponent
                                                .fromLegacyText("Sent to " + args[1] + ": " + args[2] + ": " + payload));
                         }
+                        break;
+                    case "debug":
+                        sender.sendMessage(new TextComponent("Last time of day: " + lastTimeOfDay));
+                        break;
                     default:
                         break;
                     }
