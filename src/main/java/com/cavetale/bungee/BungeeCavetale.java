@@ -10,13 +10,17 @@ import com.winthier.connect.payload.PlayerServerPayload;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -39,6 +43,9 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     private Set<UUID> joined = Collections.synchronizedSet(new HashSet<>());
     private Set<UUID> connected = Collections.synchronizedSet(new HashSet<>());
     Gson gson = new Gson();
+    // Shutdown
+    private Calendar calendar;
+    private TimeOfDay lastTimeOfDay;
 
     @Override
     public void onEnable() {
@@ -78,6 +85,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
         loadConfigs();
         String connectName = connectProperties.getProperty("server-name", "bungee");
         this.connect = new Connect(connectName, this);
+        this.calendar = new GregorianCalendar();
         ProxyServer.getInstance().getScheduler().runAsync(this, this.connect);
         getProxy().getScheduler().runAsync(this, this);
     }
@@ -110,6 +118,48 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     private void mainLoop() throws Exception {
         Runnable task = tasks.poll(1, TimeUnit.SECONDS);
         if (task != null) task.run();
+        checkForShutdown();
+    }
+
+    private void checkForShutdown() {
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        final TimeOfDay timeOfDay = new TimeOfDay(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+        if (lastTimeOfDay == null) {
+            lastTimeOfDay = timeOfDay;
+        } else if (!Objects.equals(timeOfDay, lastTimeOfDay)) {
+            lastTimeOfDay = timeOfDay;
+            if (timeOfDay.hour == 12) {
+                switch (timeOfDay.minute) {
+                case 0:
+                    announceWarn("Quick Proxy Restart in 5 minutes");
+                    break;
+                case 1:
+                    announceWarn("Quick Proxy Restart in 4 minutes");
+                    break;
+                case 2:
+                    announceWarn("Quick Proxy Restart in 3 minutes");
+                    break;
+                case 3:
+                    announceWarn("Quick Proxy Restart in 2 minutes");
+                    break;
+                case 4:
+                    announceWarn("Quick Proxy Restart in 1 minute");
+                    break;
+                case 5:
+                    announceWarn("Proxy Restarting");
+                    getProxy().stop("Daily Shutdown: " + timeOfDay);
+                    break;
+                default: break;
+                }
+            }
+        }
+    }
+
+    private void announceWarn(String msg) {
+        getLogger().warning(msg);
+        TextComponent cmp = new TextComponent(msg);
+        cmp.setColor(ChatColor.RED);
+        getProxy().broadcast(cmp);
     }
 
     // Listener
