@@ -128,6 +128,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
 
     private void checkForShutdown() {
         calendar.setTimeInMillis(System.currentTimeMillis());
+        if (calendar.get(Calendar.DAY_OF_WEEK) != 3) return;
         final TimeOfDay timeOfDay = new TimeOfDay(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
         if (lastTimeOfDay == null) {
             lastTimeOfDay = timeOfDay;
