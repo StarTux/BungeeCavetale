@@ -153,7 +153,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                     break;
                 case 5:
                     announceWarn("Proxy Restarting " + timeOfDay);
-                    getProxy().stop("Daily Restart");
+                    getProxy().stop("Weekly Proxy Restart");
                     break;
                 default: break;
                 }
