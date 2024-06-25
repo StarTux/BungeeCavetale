@@ -46,6 +46,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     // Shutdown
     private Calendar calendar;
     private TimeOfDay lastTimeOfDay;
+    private boolean restartTomorrow = false;
 
     @Override
     public void onEnable() {
@@ -82,6 +83,9 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
                     case "debug":
                         sender.sendMessage(new TextComponent("Last time of day: " + lastTimeOfDay));
                         break;
+                    case "restarttomorrow":
+                        restartTomorrow = !restartTomorrow;
+                        sender.sendMessage(new TextComponent("Restart Tomorrow toggled to " + restartTomorrow));
                     default:
                         break;
                     }
@@ -128,7 +132,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
 
     private void checkForShutdown() {
         calendar.setTimeInMillis(System.currentTimeMillis());
-        if (calendar.get(Calendar.DAY_OF_WEEK) != 3) return;
+        if (!restartTomorrow && calendar.get(Calendar.DAY_OF_WEEK) != 3) return;
         final TimeOfDay timeOfDay = new TimeOfDay(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
         if (lastTimeOfDay == null) {
             lastTimeOfDay = timeOfDay;
