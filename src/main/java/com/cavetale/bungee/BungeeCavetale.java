@@ -178,7 +178,7 @@ public final class BungeeCavetale extends Plugin implements ConnectHandler, List
     public void onServerKickEvent(ServerKickEvent event) {
         getLogger().info("[ServerKickEvent] " + event.getPlayer().getName()
                          + " from:" + event.getKickedFrom().getName()
-                         + " cause:" + event.getCause()
+                         + " cause:" + event.getReason()
                          + " state:" + event.getState()
                          + " reason:" + event.getReason());
         String from = event.getKickedFrom().getName();

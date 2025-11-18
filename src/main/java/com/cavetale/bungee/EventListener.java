@@ -120,7 +120,7 @@ public final class EventListener implements Listener {
         Map<String, Object> map = map(event);
         auto(map, "player", event.getPlayer());
         serverInfo(map, event.getKickedFrom());
-        auto(map, "cause", event.getCause());
+        auto(map, "cause", event.getReason());
         auto(map, "reason", BaseComponent.toLegacyText(event.getKickReasonComponent()));
         auto(map, "state", event.getState());
         if (debug) plugin.getLogger().info(gson.toJson(map));

@@ -12,12 +12,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
   <repositories>
 
-    <!-- Paper Repo -->
+    <!-- Spigot Repo -->
     <repository>
-      <id>papermc</id>
-      <url>https://repo.papermc.io/repository/maven-public/</url>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
     </repository>
 
     <!-- Cavetale Repo -->
@@ -29,11 +30,11 @@
   </repositories>
   <dependencies>
 
-    <!-- Waterfall -->
+    <!-- BungeeCord -->
     <dependency>
-      <groupId>io.github.waterfallmc</groupId>
-      <artifactId>waterfall-api</artifactId>
-      <version>1.21-R0.1-SNAPSHOT</version>
+      <groupId>net.md-5</groupId>
+      <artifactId>bungeecord-api</artifactId>
+      <version>1.21-R0.5-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
